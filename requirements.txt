@@ -1,0 +1,7 @@
+matplotlib~=3.3.2
+numpy~=1.19.3
+scipy~=1.5.3
+pandas~=1.1.3
+tqdm~=4.54.1
+numba~=0.52.0
+experiment-collection~=0.2.7
