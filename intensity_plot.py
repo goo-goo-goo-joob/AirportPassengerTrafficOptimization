@@ -20,7 +20,7 @@ def transform_data(data):
 
 def plot_data(data, name):
     ax = data['data'].plot(figsize=(13, 8),
-                           title=f'Пассажиропоток за 2007 - 2021 (по апрель) годы по месяцам {name}')
+                           title=f'Пассажиропоток за 2007 - 2020 годы по месяцам {name}')
     ax.set_xlabel("Время")
     ax.set_ylabel("Количество пассажиров в месяц")
     plt.grid()
