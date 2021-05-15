@@ -3,6 +3,7 @@ import itertools
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import plotly.express as px
 from scipy.optimize import minimize, LinearConstraint, NonlinearConstraint
 from tqdm import tqdm
 
@@ -269,6 +270,7 @@ class OptimalFinder:
         if plot:
             ey_plot = []
             cost_plot = []
+            n_plot = []
         for n in tqdm(
                 itertools.product(*[list(range(self.n_min_[i], self.n_max_[i] + 1)) for i in range(len(self.n_max_))])):
             ey = f_ey(n, mu, lam, p)
@@ -295,6 +297,7 @@ class OptimalFinder:
                 if plot:
                     ey_plot.append(ey)
                     cost_plot.append(cost)
+                    n_plot.append(np.delete(n, list(self.idx.keys())))
         assert x_time, 'Constraints are not met'
         df = [('Главный критерий (время ожидания)', *x_time_val),
               ('Главный критерий (количество персонала)', *x_cost_val), ('Свертка', *x_conv_val),
@@ -313,6 +316,44 @@ class OptimalFinder:
             plt.ylabel('Затраты на обслуживающий персонал, чел.')
             plt.legend()
             plt.show()
+
+            num = np.delete(np.arange(1, len(self.n_min_) + 1), list(self.idx.keys()))
+            if len(num) == 2:
+                n1_plot, n2_plot = zip(*n_plot)
+                fig = px.scatter_3d(
+                    pd.DataFrame({f'Кол-во каналов в узле {num[0]}': n1_plot,
+                                  f'Кол-во каналов в узле {num[1]}': n2_plot,
+                                  'Время ожидания, сек.': ey_plot}),
+                    x=f'Кол-во каналов в узле {num[0]}', y=f'Кол-во каналов в узле {num[1]}',
+                    z='Время ожидания, сек.', color='Время ожидания, сек.')
+                fig.show()
+
+                fig = px.scatter_3d(
+                    pd.DataFrame({f'Кол-во каналов в узле {num[0]}': n1_plot,
+                                  f'Кол-во каналов в узле {num[1]}': n2_plot,
+                                  'Затраты на персонал, чел.': cost_plot}),
+                    x=f'Кол-во каналов в узле {num[0]}', y=f'Кол-во каналов в узле {num[1]}',
+                    z='Затраты на персонал, чел.', color='Затраты на персонал, чел.')
+                fig.show()
+            elif len(num) == 3:
+                n1_plot, n2_plot, n3_plot = zip(*n_plot)
+                fig = px.scatter_3d(
+                    pd.DataFrame({f'Кол-во каналов в узле {num[0]}': n1_plot,
+                                  f'Кол-во каналов в узле {num[1]}': n2_plot,
+                                  f'Кол-во каналов в узле {num[2]}': n3_plot,
+                                  'Время ожидания, сек.': ey_plot}),
+                    x=f'Кол-во каналов в узле {num[0]}', y=f'Кол-во каналов в узле {num[1]}',
+                    z=f'Кол-во каналов в узле {num[2]}', color='Время ожидания, сек.')
+                fig.show()
+
+                fig = px.scatter_3d(
+                    pd.DataFrame({f'Кол-во каналов в узле {num[0]}': n1_plot,
+                                  f'Кол-во каналов в узле {num[1]}': n2_plot,
+                                  f'Кол-во каналов в узле {num[2]}': n3_plot,
+                                  'Затраты на персонал, чел.': cost_plot}),
+                    x=f'Кол-во каналов в узле {num[0]}', y=f'Кол-во каналов в узле {num[1]}',
+                    z=f'Кол-во каналов в узле {num[2]}', color='Затраты на персонал, чел.')
+                fig.show()
         return df
 
 

@@ -44,21 +44,36 @@ def fit_ey(mu: float, lam: float, n_min: int, n_max: int, p_pow=4, plot=False):
     :return: Массив из коэффициентов полинома.
     """
     n = np.arange(n_min, n_max + 1)
-    ey = [calc_ey(mu, lam, n_) for n_ in n]
+    ey = np.array([calc_ey(mu, lam, n_) for n_ in n])
     if len(n) < p_pow:
         p_pow = len(n) - 1
     if p_pow:
-        res = Polynomial.fit(n, np.log(ey), p_pow)
-        coef = res.convert().coef[::-1]
+        res = Polynomial.fit(n, np.log(ey), p_pow, full=True)
+        coef = res[0].convert().coef[::-1]
+        rss = res[1][0][0]
     else:
         coef = np.log(ey)
+        rss = 0.
 
     if plot:
-        plt.figure(figsize=(13, 8))
-        plt.scatter(n, ey, s=55)
         x = np.linspace(n_min - 1, n_max + 1, 100)
         f = np.poly1d(coef)
-        plt.plot(x, np.exp(f(x)), label='Аппроксимирующая кривая')
+
+        plt.figure(figsize=(13, 8))
+        plt.scatter(n, np.log(ey), s=55)
+        plt.plot(x, f(x), label=f'Аппроксимирующая кривая (полином), RSS = {np.round(rss, 2)}')
+        plt.title(
+            'Логарифм мат. ожидания времени ожидания начала обслуживания в зависимости от числа обслуживающих каналов в узле')
+        plt.xlabel('Количество обслуживающих каналов в узле')
+        plt.ylabel('Логарифм мат. ожидания времени ожидания начала обслуживания')
+        plt.legend()
+        plt.grid()
+        plt.show()
+
+        rss = np.sum(np.square(ey - np.array([np.exp(f(n_)) for n_ in n])))
+        plt.figure(figsize=(13, 8))
+        plt.scatter(n, ey, s=55)
+        plt.plot(x, np.exp(f(x)), label=f'Аппроксимирующая кривая, RSS = {np.round(rss, 2)}')
         plt.title(
             'Мат. ожидание времени ожидания начала обслуживания в зависимости от числа обслуживающих каналов в узле')
         plt.xlabel('Количество обслуживающих каналов в узле')
